@@ -1,6 +1,6 @@
 /* tree.h */
 
-#define _GNU_SOURCE
+#define _GNU_SOURCE // To Extend other functionalities other than std libraries
 
 #include <stdio.h>
 #include <stdlib.h>
