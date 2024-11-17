@@ -139,7 +139,19 @@ int main(){
     l1 = create_leaf(key, value, n, value_size); // size = sizeof string
     assert(l1);
     printf("Leaf-Addr: %p\n", l1);
+    printf("value: %s\n", l1->value);
     free(l1);
+
+    Leaf* l2;
+    key = (int8 *)"/prateek";
+    value = (int8 *)"abc234"; // some cookie for prateek's session(say) 
+    value_size = (int16)strlen((char *)value);
+    l2 = create_leaf(key, value, n, value_size); // size = sizeof string
+    assert(l2);
+    printf("Leaf-Addr: %p\n", l2);
+    printf("key: %s\n", l2->key);
+    free(l2);
+
 
 
     return 0;
