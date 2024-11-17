@@ -32,10 +32,19 @@ typedef unsigned short int16;
 typedef unsigned char int8;
 typedef unsigned char Tag;
 
+typedef void*  Nullptr;
+Nullptr nullptr = 0; 
+
 /* #define macros */
 #define TagRoot 1 /* 00 01 */
 #define TagNode 2 /* 00 10 */ // Trap -> #define no ';'
 #define TagLeaf 4 /* 01 00 */   /* When a node is both node and root -> 00 11 */
+#define find_last(x) find_last_linear(x)
+#define reterr(x)      \
+        errno = (x);   \
+        return nullptr
+
+#define NoError 0
 
 
 
@@ -59,8 +68,8 @@ struct s_leaf{
 
     // data info
     int8 key[256];
-    int8 *values; // actual data
-    int16 size; // size of the actual data in Bytes
+    int8 *value; // actual data
+    int16 size; // size of the actual data in Bytes (for values_size)
 
     // Node type
     Tag tag;

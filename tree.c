@@ -2,6 +2,7 @@
 
 #include "tree.h"
 
+
 /*
 struct s_node{
     struct s_node* west; // downwards node is a internal node
@@ -26,6 +27,16 @@ Tree root = {
      }
 };
 
+void zero(int8* str, int16 size){
+    int8* p;
+    int16 i;
+
+    for(p = str, i = 0; i < size; i++, p++)
+        *p = 0; 
+    return;
+}
+
+
 
 Node* create_node(Node* parent, int8* path){
     assert(parent); // non-null
@@ -35,13 +46,13 @@ Node* create_node(Node* parent, int8* path){
 
     int16 size = sizeof(struct s_node);
     current = (Node*)malloc( size ); // allocates mem to current
+    assert(current);
 
     parent->west = current;
 
     // memset current before init the other things
-    // current = zero( (int8 *)current, size );
-    assert(current);
-    memset(current, 0, size );
+    zero( (int8 *)current, size );
+    // memset(current, 0, size );
 
     // west will bge set when it will have child
     // current->east = 0; and current->west = 0;
@@ -52,15 +63,84 @@ Node* create_node(Node* parent, int8* path){
     return current;
 }
 
-int main(){
-    // printf("Hello World!");
-    // printf("%p\n", (void*)&root); // can print the addr of the root -> 0x104d7e000
 
+Leaf* find_last_linear(Node* parent){
+    assert(parent);
+
+    // assume parent exists
+    Leaf* l;
+
+    if( !parent->east )
+        reterr(NoError); // both are pragmas for when no leaf
+
+    for(l = parent->east; l->east; l = l->east)
+    assert(l);
+
+    return l;
+}
+
+Leaf* create_leaf( int8* key, int8* value, Node* parent, int16 value_size ){
+
+    assert(parent);
+    // Need to figure out the last leaf or is it the Node(i.e not a Leaf?)?
+    // Node -> leaf1 -> leaf2 -> leaf3 ... [parent can be leaf/Node]
+    Leaf* l;
+    Node* n;
+
+    // create a leaf
+    Leaf* new_leaf = (Leaf*)malloc(sizeof(struct s_leaf));
+    assert(new_leaf); // actually mem allocated?
+    // zero( (int8 *)new_leaf, leaf_size ); // each byte is zeroed.
+
+    l = find_last(parent); // l can be null or the last leaf that exists
+    if(!l) {// 1st Node
+        parent->east = new_leaf;
+        new_leaf->west = (Tree *)parent; // this new_leaf is why we made .west as Union
+    }
+    else{
+        l->east = new_leaf;
+        new_leaf->west = (Tree *)l; 
+    }
+
+    new_leaf->tag = TagLeaf;
+
+    // set key and value
+    strncpy( (char *)new_leaf->key, (char *)key, 127 ); // 255 max
+
+    // allocate mem for value
+    new_leaf->value = (int8 *)malloc(sizeof(value_size));
+    assert(new_leaf->value);
+    zero( (int8 *)new_leaf->value, value_size );
+    strncpy( (char *)new_leaf->value, (char *)value, value_size );
+
+    return new_leaf;
+}
+
+int main(){
+    /* Verify Skeleton */ 
+    printf("Hello World!");
+    printf("Root: %p\n", (void*)&root); // can print the addr of the root -> 0x104d7e000
+
+    /* Verify create_node() */ 
     Node* n = create_node((Node *)&root, (int8 *)"/Users");
     assert(n);
     Node* n2 = create_node(n, (int8 *)"/Users/login");
     assert(n2);
+    printf("Par-NodeAddr, Child-NodeAddr: %p %p\n", n, n2); // 0x56030e5c62a0 0x56030e5c63d0
+    // free after use -> Best prac
+    free(n);
+    free(n2);
 
-    printf("%p %p\n", n, n2); // 0x56030e5c62a0 0x56030e5c63d0
+    /* Verify create_leaf() */ 
+    Leaf* l1;
+    int8 *key = (int8 *)"/prateek";
+    int8 *value = (int8 *)"abc123"; // some cookie for prateek's session(say) 
+    int16 value_size = (int16)strlen((char *)value);
+    l1 = create_leaf(key, value, n, value_size); // size = sizeof string
+    assert(l1);
+    printf("Leaf-Addr: %p\n", l1);
+    free(l1);
+
+
     return 0;
 }
